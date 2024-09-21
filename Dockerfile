@@ -1,53 +1,35 @@
-FROM ghcr.io/linuxserver/baseimage-kasmvnc:debianbookworm
+FROM ghcr.nju.edu.cn/linuxserver/baseimage-kasmvnc:debianbookworm
 
 # set version label
 ARG BUILD_DATE
 ARG VERSION
-ARG UGC_VERSION
 LABEL build_version="Linuxserver.io version:- ${VERSION} Build-date:- ${BUILD_DATE}"
 LABEL maintainer="thelamer"
 
 # title
-ENV TITLE="Ungoogled Chromium"
+ENV TITLE=vivaldi
+ENV LC_ALL=en_US.UTF-8
 
 RUN \
   echo "**** add icon ****" && \
   curl -o \
     /kclient/public/icon.png \
-    https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/ungoogled-chromium-logo.png && \
-  mkdir -p \
-    /usr/share/icons/hicolor/192x192/apps/ && \
-  cp \
-    /kclient/public/icon.png \
-    /usr/share/icons/hicolor/192x192/apps/ungoogled-chromium-logo.png && \
+    https://vivaldi.com/favicon.ico && \
   echo "**** install packages ****" && \
+  echo 'deb https://mirror.nju.edu.cn/debian/ bookworm main contrib non-free non-free-firmware\n\
+  deb https://mirror.nju.edu.cn/debian/ bookworm-updates main contrib non-free non-free-firmware\n\
+  deb https://mirror.nju.edu.cn/debian/ bookworm-backports main contrib non-free non-free-firmware\n\
+  deb https://mirror.nju.edu.cn/debian-security bookworm-security main contrib non-free non-free-firmware' \
+   > /etc/apt/sources.list && \
   apt-get update && \
-  apt-get install -y \
-    libatk1.0-0 \
-    libatk-bridge2.0-0 \
-    libcups2 \
-    libnss3 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxkbcommon0 \
-    thunar \
-    xz-utils && \
-  if [ -z ${UGC_VERSION+x} ]; then \
-    UGC_VERSION=$(curl -sX GET "https://api.github.com/repos/ungoogled-software/ungoogled-chromium-portablelinux/releases/latest" \
-      | awk '/tag_name/{print $4;exit}' FS='[""]'); \
-  fi && \
-  curl -o \
-    /tmp/ugc.tar.xz -L \
-    "https://github.com/ungoogled-software/ungoogled-chromium-portablelinux/releases/download/${UGC_VERSION}/ungoogled-chromium_${UGC_VERSION}_linux.tar.xz" && \
-  mkdir -p \
-    /opt/ungoogledchromium && \
-  tar xf \
-    /tmp/ugc.tar.xz -C \
-    /opt/ungoogledchromium --strip-components=1 && \
+  (cd /tmp && curl -LO https://github.com/uniartisan/fonts-harmonyos-sans-cn/releases/download/v1.0.0/harmonyos_sans.deb) && \
+  (cd /tmp && curl -O https://downloads.vivaldi.com/stable/vivaldi-stable_6.9.3447.46-1_amd64.deb) && \
+  dpkg -i /tmp/harmonyos_sans.deb /tmp/vivaldi*.deb || true && \
+  apt-get install -fy --no-install-recommends &&\
   echo "**** cleanup ****" && \
   apt-get autoclean && \
   rm -rf \
-    /root/.cache \
+    /config/.cache \
     /var/lib/apt/lists/* \
     /var/tmp/* \
     /tmp/*

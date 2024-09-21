@@ -1,2 +1,2 @@
 #!/bin/bash
-wrapped-chromium ${CHROME_CLI}
+wrapped-vivaldi

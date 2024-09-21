@@ -1,16 +1,17 @@
 #!/bin/bash
 
-BIN=/opt/ungoogledchromium/chrome
+BIN=/usr/bin/vivaldi
 
 # Cleanup
-if ! pgrep chrome > /dev/null;then
-  rm -f $HOME/.config/chromium/Singleton*
+if ! pgrep vivaldi > /dev/null;then
+  rm -f $HOME/.config/vivaldi/Singleton*
 fi
 
 # Run normally on privved containers or modified un non priv
 if grep -q 'Seccomp:.0' /proc/1/status; then
   ${BIN} \
   --ignore-gpu-blocklist \
+  --no-first-run \
   --password-store=basic \
   --simulate-outdated-no-au='Tue, 31 Dec 2099 23:59:59 GMT' \
   --start-maximized \
@@ -19,6 +20,7 @@ if grep -q 'Seccomp:.0' /proc/1/status; then
 else
   ${BIN} \
   --ignore-gpu-blocklist \
+  --no-first-run \
   --no-sandbox \
   --password-store=basic \
   --simulate-outdated-no-au='Tue, 31 Dec 2099 23:59:59 GMT' \
